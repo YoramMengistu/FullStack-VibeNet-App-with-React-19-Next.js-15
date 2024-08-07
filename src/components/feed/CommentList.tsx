@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { Comment, User } from "@prisma/client";
 import Image from "next/image";
 import { useOptimistic, useState } from "react";
+
 type CommentWithUser = Comment & { user: User };
 
 const CommentList = ({
