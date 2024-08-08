@@ -2,7 +2,9 @@
 
 import { addStory } from "@/lib/actions";
 import { useUser } from "@clerk/nextjs";
-import { Story, User } from "@prisma/client";
+import { User } from "@prisma/client";
+import type { Story } from "@prisma/client";
+
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
 import { useOptimistic, useState } from "react";
