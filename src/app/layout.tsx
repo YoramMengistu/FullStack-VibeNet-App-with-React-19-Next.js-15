@@ -7,8 +7,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VibeNet Web",
-  description: "VibeNet App with Next.js",
+  title: "Vibenet || Social Media App",
+  description: "Social media app built with Next.js",
 };
 
 export default function RootLayout({
