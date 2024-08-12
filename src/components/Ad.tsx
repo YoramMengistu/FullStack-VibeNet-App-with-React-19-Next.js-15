@@ -36,10 +36,10 @@ const Ad = ({ size }: { size: "sm" | "md" | "lg" }) => {
         </div>
         <p className={size === "sm" ? "text-xs" : "text-sm"}>
           {size === "sm"
-            ? "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+            ? "Discover the ultimate dining experience at BigChef Lounge. With a diverse menu, elegant ambiance, and personalized service, every meal becomes a memorable event."
             : size === "md"
-            ? "Lorem ipsum dolor sit amet consectetur adipisicing elit.  Lorem ipsum dolor sit amet consectetur adipisicing elit."
-            : "Lorem ipsum dolor sit amet consectetur adipisicing elit.  Lorem ipsum dolor sit amet consectetur adipisicing elit.  Lorem ipsum dolor sit amet consectetur adipisicing elit."}
+            ? "Discover the ultimate dining experience at BigChef Lounge. With a diverse menu, elegant ambiance, and personalized service, every meal becomes a memorable event."
+            : "Discover the ultimate dining experience at BigChef Lounge. With a diverse menu, elegant ambiance, and personalized service, every meal becomes a memorable event."}
         </p>
         <button className="bg-gray-200 text-gray-500 p-2 text-xs rounded-lg">
           Learn more

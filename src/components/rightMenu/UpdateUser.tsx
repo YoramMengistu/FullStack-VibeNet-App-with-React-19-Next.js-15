@@ -12,7 +12,10 @@ const UpdateUser = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
   const [cover, setCover] = useState<any>(false);
 
-  const [state, formAction] = useActionState(updateProfile,{success:false,error:false});
+  const [state, formAction] = useActionState(updateProfile, {
+    success: false,
+    error: false,
+  });
 
   const router = useRouter();
 
@@ -80,7 +83,7 @@ const UpdateUser = ({ user }: { user: User }) => {
                 </label>
                 <input
                   type="text"
-                  placeholder={user.name || "John"}
+                  placeholder={user.name || "yoram"}
                   className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
                   name="name"
                 />
@@ -91,7 +94,7 @@ const UpdateUser = ({ user }: { user: User }) => {
                 </label>
                 <input
                   type="text"
-                  placeholder={user.surname || "Doe"}
+                  placeholder={user.surname || "dahan"}
                   className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
                   name="surname"
                 />
@@ -115,7 +118,7 @@ const UpdateUser = ({ user }: { user: User }) => {
                 </label>
                 <input
                   type="text"
-                  placeholder={user.city || "New York"}
+                  placeholder={user.city || "Israel"}
                   className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
                   name="city"
                 />
@@ -154,13 +157,13 @@ const UpdateUser = ({ user }: { user: User }) => {
                 </label>
                 <input
                   type="text"
-                  placeholder={user.website || "lama.dev"}
+                  placeholder={user.website || "VibeNet.dev"}
                   className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
                   name="website"
                 />
               </div>
             </div>
-            <UpdateButton/>
+            <UpdateButton />
             {state.success && (
               <span className="text-green-500">Profile has been updated!</span>
             )}
