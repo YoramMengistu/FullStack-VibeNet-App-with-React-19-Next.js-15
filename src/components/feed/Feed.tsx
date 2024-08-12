@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
-import Post from "./Post";
+// import Post from "./Post";
 import prisma from "@/lib/client";
+import Post from "./Post";
 
 const Feed = async ({ username }: { username?: string }) => {
   const { userId } = auth();

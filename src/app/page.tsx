@@ -1,5 +1,11 @@
 // import AddPost from "@/components/AddPost";
 // import Stories from "@/components/Stories";
+// import AddPost from "@/components/AddPost";
+// import Feed from "@/components/feed/Feed";
+// import LeftMenu from "@/components/leftMenu/LeftMenu";
+// import RightMenu from "@/components/rightMenu/RightMenu";
+// import Stories from "@/components/Stories";
+
 import AddPost from "@/components/AddPost";
 import Feed from "@/components/feed/Feed";
 import LeftMenu from "@/components/leftMenu/LeftMenu";
