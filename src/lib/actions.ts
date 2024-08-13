@@ -267,7 +267,6 @@ export const addPost = async (formData: FormData, img: string) => {
   const validatedDesc = Desc.safeParse(desc);
 
   if (!validatedDesc.success) {
-    //TODO
     console.log("description is not valid");
     return;
   }
@@ -338,7 +337,7 @@ export const deletePost = async (postId: number) => {
         userId,
       },
     });
-    revalidatePath("/")
+    revalidatePath("/");
   } catch (err) {
     console.log(err);
   }

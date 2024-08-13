@@ -52,8 +52,8 @@
 //   // For this guide, you simply log the payload to the console
 //   const { id } = evt.data;
 //   const eventType = evt.type;
-//   console.log(`Webhook with and ID of ${id} and type of ${eventType}`);
-//   console.log("Webhook body:", body);
+//   // console.log(`Webhook with and ID of ${id} and type of ${eventType}`);
+//   // console.log("Webhook body:", body);
 
 //   if (eventType === "user.created") {
 //     try {
@@ -100,32 +100,36 @@ export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    console.error("WEBHOOK_SECRET is not defined in .env file.");
-    return new Response("Server configuration error", { status: 500 });
+    throw new Error("Please add WEBHOOK_SECRET from Clerk Dashboard to .env");
   }
 
-  // קבלת ה-Headers
+  // Get the headers
   const headerPayload = headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
   const svix_signature = headerPayload.get("svix-signature");
 
-  // אם ה-Headers לא קיימים, מחזירים שגיאה
+  // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response("Missing Svix headers", { status: 400 });
+    return new Response("Error occured -- no svix headers", {
+      status: 400,
+    });
   }
 
-  // קבלת ה-Body של הבקשה
+  // Get the body
   const payload = await req.json();
+  if (!payload) {
+    return new Response("Empty payload", { status: 400 });
+  }
   const body = JSON.stringify(payload);
   console.log("Webhook body:", body);
 
-  // יצירת אינסטנס של Svix עם הסוד שלך
+  // Create a new Svix instance with your secret.
   const wh = new Webhook(WEBHOOK_SECRET);
 
   let evt: WebhookEvent;
 
-  // אימות ה-Webhook
+  // Verify the payload with the headers
   try {
     evt = wh.verify(body, {
       "svix-id": svix_id,
@@ -134,42 +138,61 @@ export async function POST(req: Request) {
     }) as WebhookEvent;
   } catch (err) {
     console.error("Error verifying webhook:", err);
-    return new Response("Invalid signature", { status: 400 });
+    return new Response("Error occured", {
+      status: 400,
+    });
   }
 
-  // עיבוד ה-Event לפי סוגו
+  // Do something with the payload
+  const { id } = evt.data;
   const eventType = evt.type;
 
+  if (!evt.data || !evt.data.id) {
+    return new Response("Invalid event data", { status: 400 });
+  }
+
+  let parsedData;
   try {
-    if (eventType === "user.created") {
+    parsedData = JSON.parse(body).data;
+  } catch (err) {
+    console.error("Error parsing JSON:", err);
+    return new Response("Invalid JSON format", { status: 400 });
+  }
+
+  if (eventType === "user.created") {
+    try {
       await prisma.user.create({
         data: {
-          id: evt.data.id,
-          username: payload.data.username,
-          avatar: payload.data.image_url || "/noAvatar.png",
+          id: parsedData.id,
+          username: parsedData.username,
+          avatar: parsedData.image_url || "/noAvatar.png",
           cover: "/noCover.png",
         },
       });
       return new Response("User has been created!", { status: 200 });
+    } catch (err) {
+      console.log(err);
+      return new Response("Failed to create the user!", { status: 500 });
     }
+  }
 
-    if (eventType === "user.updated") {
+  if (eventType === "user.updated") {
+    try {
       await prisma.user.update({
         where: {
-          id: evt.data.id,
+          id: parsedData.id,
         },
         data: {
-          username: payload.data.username,
-          avatar: payload.data.image_url || "/noAvatar.png",
+          username: parsedData.username,
+          avatar: parsedData.image_url || "/noAvatar.png",
         },
       });
       return new Response("User has been updated!", { status: 200 });
+    } catch (err) {
+      console.log(err);
+      return new Response("Failed to update the user!", { status: 500 });
     }
-
-    // טיפול ב-Event שלא זוהה
-    return new Response("Unhandled event type", { status: 400 });
-  } catch (err) {
-    console.error("Database error:", err);
-    return new Response("Internal server error", { status: 500 });
   }
+
+  return new Response("Webhook received", { status: 200 });
 }
