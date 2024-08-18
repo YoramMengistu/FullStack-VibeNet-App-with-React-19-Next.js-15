@@ -131,41 +131,39 @@
 // //     return new Response("Bad Request", { status: 400 });
 // //   }
 // // }
-
 import { Webhook } from "svix";
+import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import prisma from "@/lib/client";
 
 export async function POST(req: Request) {
-  const WEBHOOK_SECRET: string =
-    process.env.WEBHOOK_SECRET || "whsec_t93Uws+u24gVcnd9lj7xRPum4c/kgoih";
-
-  // Debugging: Log the secret
-  console.log("WEBHOOK_SECRET:", WEBHOOK_SECRET);
+  // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    return new Response("WEBHOOK_SECRET is missing", { status: 500 });
+    throw new Error(
+      "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local"
+    );
   }
 
   // Get the headers
-  const headerPayload = req.headers;
-  console.log("Headers:", headerPayload);
-
+  const headerPayload = headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
   const svix_signature = headerPayload.get("svix-signature");
 
-  // Check headers
+  // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response("Missing svix headers", { status: 400 });
+    return new Response("Error occured -- no svix headers", {
+      status: 400,
+    });
   }
 
   // Get the body
   const payload = await req.json();
   const body = JSON.stringify(payload);
-  console.log("Webhook body:", body);
 
-  // Create a new Svix instance with your secret
+  // Create a new Svix instance with your secret.
   const wh = new Webhook(WEBHOOK_SECRET);
 
   let evt: WebhookEvent;
@@ -179,44 +177,51 @@ export async function POST(req: Request) {
     }) as WebhookEvent;
   } catch (err) {
     console.error("Error verifying webhook:", err);
-    return new Response("Verification failed", { status: 400 });
+    return new Response("Error occured", {
+      status: 400,
+    });
   }
 
-  // Handle the event
+  // Do something with the payload
+  // For this guide, you simply log the payload to the console
   const { id } = evt.data;
   const eventType = evt.type;
+  console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
+  console.log('Webhook body:', body)
 
-  try {
-    if (eventType === "user.created") {
+  if (eventType === "user.created") {
+    try {
       await prisma.user.create({
         data: {
-          id,
-          username: payload.data.username,
-          avatar: payload.data.image_url || "/noAvatar.png",
+          id: evt.data.id,
+          username: JSON.parse(body).data.username,
+          avatar: JSON.parse(body).data.image_url || "/noAvatar.png",
           cover: "/noCover.png",
         },
       });
-      return new Response(
-        JSON.stringify({ message: "User has been created!" }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    } else if (eventType === "user.updated") {
+      return new Response("User has been created!", { status: 200 });
+    } catch (err) {
+      console.log(err);
+      return new Response("Failed to create the user!", { status: 500 });
+    }
+  }
+  if (eventType === "user.updated") {
+    try {
       await prisma.user.update({
-        where: { id },
+        where: {
+          id: evt.data.id,
+        },
         data: {
-          username: payload.data.username,
-          avatar: payload.data.image_url || "/noAvatar.png",
+          username: JSON.parse(body).data.username,
+          avatar: JSON.parse(body).data.image_url || "/noAvatar.png",
         },
       });
       return new Response("User has been updated!", { status: 200 });
-    } else {
-      return new Response("Unhandled event type", { status: 400 });
+    } catch (err) {
+      console.log(err);
+      return new Response("Failed to update the user!", { status: 500 });
     }
-  } catch (err) {
-    console.error("Database operation failed:", err);
-    return new Response("Database operation failed", { status: 500 });
   }
+
+  return new Response("Webhook received", { status: 200 });
 }
